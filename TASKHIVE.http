@@ -1,0 +1,6 @@
+@TASKHIVE_HostAddress = http://localhost:5072
+
+GET {{TASKHIVE_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
