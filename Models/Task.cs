@@ -14,7 +14,7 @@ namespace TASKHIVE.Models
         public string? Dependancy { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime DueDate { get; set; }
-        public int Priority { get; set; }
+        public string Priority { get; set; }
         //     public int UserId { get; set; }
 
 

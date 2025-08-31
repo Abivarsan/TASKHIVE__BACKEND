@@ -6,7 +6,7 @@ namespace TASKHIVE.DTOs
         public int UserId { get; set; }
 
         public string DeveloperName { get; set; }
-
+        public string ImageSrc { get; set; }
 
         public string Email { get; set; }
 

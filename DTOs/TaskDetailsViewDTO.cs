@@ -11,6 +11,6 @@
         public string Dependancies { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime DueDate { get; set;}
-        public int Priority { get; set; }
+        public string Priority { get; set; }
     }
 }

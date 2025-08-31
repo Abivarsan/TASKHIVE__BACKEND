@@ -32,8 +32,10 @@ namespace TASKHIVE.Controllers
             this._hostEnvironment = hostEnvironment;
         }
 
+        
+
         [HttpPost("register")]
-        public async Task<ActionResult<string>> RegisterUser([FromForm] UserRegisterDto request)
+        public async Task<ActionResult<string>> RegisterUser([FromBody] UserRegisterDto request)
         {
             var randomPassword = CreateRandomPassword(10);
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(randomPassword);
@@ -60,12 +62,6 @@ namespace TASKHIVE.Controllers
 
             int JobRoleId = jobRole.JobRoleId;
 
-            string imageName = null;
-            if (request.ImageFile != null)
-            {
-                imageName = await SaveImage(request.ImageFile);
-            }
-
             User newUser = new User
             {
                 UserName = request.UserName,
@@ -80,8 +76,7 @@ namespace TASKHIVE.Controllers
                 Email = request.Email,
                 JobRoleId = JobRoleId,
                 UserCategoryId = UserCategoryId,
-                ProfileImageName = imageName
-
+                ProfileImageUrl = request.ProfileImageUrl // Firebase URL
             };
 
             _dataContext.Users.Add(newUser);
@@ -94,40 +89,122 @@ namespace TASKHIVE.Controllers
             switch (request.UserCategoryType)
             {
                 case "Admin":
-                    var newAdmin = new Admin
-                    {
-                        AdminId = newUserId,
-
-                    };
+                    var newAdmin = new Admin { AdminId = newUserId };
                     _dataContext.Admins.Add(newAdmin);
                     break;
-
                 case "Manager":
-                    var newProjectManager = new ProjectManager
-                    {
-                        ProjectManagerId = newUserId,
-
-                    };
+                    var newProjectManager = new ProjectManager { ProjectManagerId = newUserId };
                     _dataContext.ProjectManagers.Add(newProjectManager);
                     break;
-
                 case "Developer":
                     var newDeveloper = new Developer
                     {
                         DeveloperId = newUserId,
                         FinanceReceiptId = 1,
-                        TotalDeveloperWorkingHours = 0,
-
+                        TotalDeveloperWorkingHours = 0
                     };
                     _dataContext.Developers.Add(newDeveloper);
                     break;
-
             }
 
             await _dataContext.SaveChangesAsync();
-
             return randomPassword;
         }
+        //public async Task<ActionResult<string>> RegisterUser([FromForm] UserRegisterDto request)
+        //{
+        //    var randomPassword = CreateRandomPassword(10);
+        //    string passwordHash = BCrypt.Net.BCrypt.HashPassword(randomPassword);
+
+        //    var existingUser = _dataContext.Users.FirstOrDefault(u => u.UserName == request.UserName);
+        //    if (existingUser != null)
+        //    {
+        //        return BadRequest(new { message = "Username already exists" });
+        //    }
+
+        //    var userCategory = _dataContext.UsersCategories.FirstOrDefault(uc => uc.UserCategoryType == request.UserCategoryType);
+        //    if (userCategory == null)
+        //    {
+        //        return BadRequest(new { message = "Invalid UserCategoryType" });
+        //    }
+
+        //    int UserCategoryId = userCategory.UserCategoryId;
+
+        //    var jobRole = _dataContext.JobRoles.FirstOrDefault(jr => jr.JobRoleType == request.JobRoleType);
+        //    if (jobRole == null)
+        //    {
+        //        return BadRequest(new { message = "Invalid jobRoleType" });
+        //    }
+
+        //    int JobRoleId = jobRole.JobRoleId;
+
+        //    string imageName = null;
+        //    if (request.ImageFile != null)
+        //    {
+        //        imageName = await SaveImage(request.ImageFile);
+        //    }
+
+        //    User newUser = new User
+        //    {
+        //        UserName = request.UserName,
+        //        PasswordHash = passwordHash,
+        //        FirstName = request.FirstName,
+        //        LastName = request.LastName,
+        //        Address = request.Address,
+        //        Gender = request.Gender,
+        //        NIC = request.NIC,
+        //        DOB = request.DOB,
+        //        ContactNumber = request.ContactNumber,
+        //        Email = request.Email,
+        //        JobRoleId = JobRoleId,
+        //        UserCategoryId = UserCategoryId,
+        //        ProfileImageName = imageName
+
+        //    };
+
+        //    _dataContext.Users.Add(newUser);
+        //    await _dataContext.SaveChangesAsync();
+
+        //    // Get the newly created user's UserId
+        //    int newUserId = newUser.UserId;
+
+        //    // Add the UserId to the relevant table based on UserCategoryType
+        //    switch (request.UserCategoryType)
+        //    {
+        //        case "Admin":
+        //            var newAdmin = new Admin
+        //            {
+        //                AdminId = newUserId,
+
+        //            };
+        //            _dataContext.Admins.Add(newAdmin);
+        //            break;
+
+        //        case "Manager":
+        //            var newProjectManager = new ProjectManager
+        //            {
+        //                ProjectManagerId = newUserId,
+
+        //            };
+        //            _dataContext.ProjectManagers.Add(newProjectManager);
+        //            break;
+
+        //        case "Developer":
+        //            var newDeveloper = new Developer
+        //            {
+        //                DeveloperId = newUserId,
+        //                FinanceReceiptId = 1,
+        //                TotalDeveloperWorkingHours = 0,
+
+        //            };
+        //            _dataContext.Developers.Add(newDeveloper);
+        //            break;
+
+        //    }
+
+        //    await _dataContext.SaveChangesAsync();
+
+        //    return randomPassword;
+        //}
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ViewUserDetailDto>> GetById(int id)
@@ -153,8 +230,7 @@ namespace TASKHIVE.Controllers
                 Gender = user.Gender,
                 NIC = user.NIC,
                 DOB = user.DOB,
-                ImageSrc = String.Format("{0}://{1}{2}/Images/{3}", Request.Scheme, Request.Host, Request.PathBase, user.ProfileImageName),
-                ProfileImageName = user.ProfileImageName,
+                ProfileImageUrl = user.ProfileImageUrl,
                 IsActive = user.IsActive,
                 ContactNumber = user.ContactNumber,
                 Email = user.Email,
@@ -175,8 +251,8 @@ namespace TASKHIVE.Controllers
             // Map each user to ViewUserListDto
             var viewUserListDtos = users.Select(user => new ViewUserListDto
             {
-                ImageSrc = String.Format("{0}://{1}{2}/Images/{3}", Request.Scheme, Request.Host, Request.PathBase, user.ProfileImageName),
-                ProfileImageName = user.ProfileImageName,
+
+                ProfileImageUrl = user.ProfileImageUrl,
                 UserId = user.UserId,
                 FirstName = user.FirstName,
                 UserName = user.UserName,
@@ -289,7 +365,8 @@ namespace TASKHIVE.Controllers
         }
 
         [HttpPut("update/{userId}")]
-        public async Task<ActionResult> UpdateUserProfile(int userId, [FromForm] UserUpdateDto request)
+        
+        public async Task<IActionResult> UpdateUserProfile(int userId, [FromBody] UserUpdateDto request)
         {
             var user = await _dataContext.Users.FindAsync(userId);
             if (user == null)
@@ -297,19 +374,15 @@ namespace TASKHIVE.Controllers
                 return NotFound(new { message = "User not found" });
             }
 
-            // Check if the email is already taken by another user
-            var existingUser = _dataContext.Users.FirstOrDefault(u => u.UserId != userId);
-
-
+            // Update user fields
             user.Email = request.Email;
             user.ContactNumber = request.ContactNumber;
             user.Address = request.Address;
 
-            if (request.ImageFile != null)
+            // Update profile image URL if provided
+            if (!string.IsNullOrEmpty(request.ProfileImageUrl))
             {
-                // Save new profile image
-                var imageName = await SaveImage(request.ImageFile);
-                user.ProfileImageName = imageName;
+                user.ProfileImageUrl = request.ProfileImageUrl;
             }
 
             _dataContext.Users.Update(user);
@@ -411,8 +484,7 @@ namespace TASKHIVE.Controllers
                             u.UserCategory.UserCategoryType.ToLower().Contains(term))
                 .Select(u => new ViewUserListDto
                 {
-                    ImageSrc = String.Format("{0}://{1}{2}/Images/{3}", Request.Scheme, Request.Host, Request.PathBase, u.ProfileImageName),
-                    ProfileImageName = u.ProfileImageName,
+                   
                     UserId = u.UserId,
                     FirstName = u.FirstName,
                     UserName = u.UserName,

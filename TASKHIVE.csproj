@@ -35,4 +35,8 @@
     <PackageReference Include="System.Net.Mail.Abstractions" Version="1.1.21" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\PManagerControllers\NewFolder\" />
+  </ItemGroup>
+
 </Project>

@@ -12,8 +12,7 @@
         public string NIC { get; set; }
         public DateTime DOB { get; set; }
         public string Gender { get; set; }
-        public string ProfileImageName { get; set; }
-        public string ImageSrc { get; set; }
+        public string ProfileImageUrl { get; set; }  // Add this for clarity
         public bool IsActive { get; set; } = true;
         public string JobRoleType { get; set; }
         public string UserCategoryType { get; set; }

@@ -20,7 +20,6 @@ namespace TASKHIVE.Controllers
         }
 
         [HttpGet]
-
         public async Task<ActionResult<List<GetDashboardDto>>> GetDashboard()
         {
             var totaladmins= await _datacontext.Admins.CountAsync();
@@ -49,6 +48,8 @@ namespace TASKHIVE.Controllers
             };
             return Ok(dashboarddata);
         }
+
+
 
     }
 }

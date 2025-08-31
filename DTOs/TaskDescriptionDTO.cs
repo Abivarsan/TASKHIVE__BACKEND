@@ -17,7 +17,7 @@ namespace TASKHIVE.DTOs
 
         public string TaskDescription { get; set; }
 
-        public int Priority { get; set; }
+        public string Priority { get; set; }
 
         public string? Technology { get; set; }
 

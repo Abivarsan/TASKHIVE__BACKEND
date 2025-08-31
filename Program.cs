@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
+using TASKHIVE.Controllers.Email;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,20 +28,18 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("ReactJSDomain",
-        policy => policy.WithOrigins("*")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowAnyOrigin()
-        );
-});
-builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+builder.Services.AddCors(options =>
 {
-    build.WithOrigins(" *").AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
-}));
+    options.AddPolicy("ReactAppPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // React dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddControllers();
 
 //Add authentication and JwtBearer 
@@ -65,7 +64,7 @@ builder.Services.AddAuthentication(options =>
 // Add Authoraization 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("ADMIN"));
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
     options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("MANAGER"));
     options.AddPolicy("RequireDeveloperRole", policy => policy.RequireRole("DEVELOPER"));
 });
@@ -75,6 +74,7 @@ var configuration = builder.Configuration;
 
 // Configure DbContext
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DBCS")));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 var app = builder.Build();
 
@@ -93,9 +93,9 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseHttpsRedirection();
 
-app.UseCors("ReactJSDomain");
 
-app.UseCors("corspolicy");
+
+app.UseCors("ReactAppPolicy");
 
 app.UseAuthentication();
 

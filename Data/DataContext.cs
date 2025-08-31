@@ -47,11 +47,7 @@ namespace TASKHIVE.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure Project relationships to prevent multiple cascade paths
-            modelBuilder.Entity<Project>()
-                .HasOne(p => p.Admin)
-                .WithMany(a => a.Projects)
-                .HasForeignKey(p => p.AdminId)
-                .OnDelete(DeleteBehavior.NoAction);
+            
 
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.Client)
@@ -63,7 +59,7 @@ namespace TASKHIVE.Data
                 .HasOne(p => p.ProjectManager)
                 .WithMany(pm => pm.Projects)
                 .HasForeignKey(p => p.ProjectManagerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<TaskTime>()
               .HasOne(tt => tt.Task)

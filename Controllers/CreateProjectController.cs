@@ -18,35 +18,22 @@ namespace TASKHIVE.Controllers
         }
 
         [HttpPost]      //  https://localhost:44339/api/CreateProject
-        public async Task<ActionResult<List<Project>>> Create(ProjectDto request,int id)
+        public async Task<ActionResult<List<Project>>> Create(ProjectDto request, int projectManagerId)
         {
-
-
-
-
-            int loggedAdminId = id;
-
-
-            
-
-
             var client = await _context.Clients.FindAsync(request.ClientId);
             if (client == null)
             {
-                return NotFound();
+                return NotFound("Client not found");
             }
 
-            var pManager = await _context.ProjectManagers.FindAsync(request.ProjectManagerId);
+            var pManager = await _context.ProjectManagers.FindAsync(projectManagerId);
             if (pManager == null)
             {
-                return NotFound();
+                return NotFound("Project Manager not found");
             }
-
-
 
             var newProject = new Project
             {
-                //ProjectId = request.ProjectId,
                 ProjectName = request.ProjectName,
                 ProjectDescription = request.ProjectDescription,
                 Technologies = request.Technologies,
@@ -61,14 +48,15 @@ namespace TASKHIVE.Controllers
                 ProjectStatus = "New",
 
                 Client = client,
-                ProjectManager = pManager,
-                AdminId = loggedAdminId
+                ProjectManager = pManager
             };
 
             _context.Add(newProject);
             await _context.SaveChangesAsync();
-            return Ok();
+
+            return Ok(newProject);
         }
+
 
 
         [HttpPut("{id}")] 

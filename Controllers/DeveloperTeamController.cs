@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Utilities.IO;
 using TASKHIVE.Data;
-using TASKHIVE.DTOs;
 using TASKHIVE.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -56,43 +55,48 @@ namespace TASKHIVE.Controllers
 
 
         [HttpGet("TeamDescription/{projectid}")]
-        public async Task<ActionResult<IEnumerable<GetTeamDetailsDTO>>> GetTeamDetails(int projectid)
+        public async Task<ActionResult<TeamDetailsResponseDTO>> GetTeamDetails(int projectid)
         {
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.ProjectId == projectid);
 
-
-            var developerIds = await _context.DeveloperProjects
-           .Where(p => p.ProjectId == projectid)
-           .Select(p => p.DeveloperId)
-           .ToListAsync();
-
-            var userIds = developerIds.Distinct();
-            var userDetails = await _context.Users
-                .Where(u => userIds.Contains(u.UserId))
-                .ToListAsync();
-
-
-
-            var teamDetails = userDetails.Select(u => new GetTeamDetailsDTO
+            if (project == null)
             {
-
-                UserId = u.UserId,
-                DeveloperName = u.FirstName + " " + u.LastName,
-                Email = u.Email,
-                ContactNumber = u.ContactNumber
-
-            });
-
-
-            if (teamDetails == null)
-            {
-                Console.WriteLine("Team details does not exist");
+                return NotFound(new { message = "Project not found" });
             }
 
+            var developerIds = await _context.DeveloperProjects
+                .Where(p => p.ProjectId == projectid)
+                .Select(p => p.DeveloperId)
+                .Distinct()
+                .ToListAsync();
 
+            var userDetails = await _context.Users
+                .Where(u => developerIds.Contains(u.UserId))
+                .ToListAsync();
 
-            return Ok(teamDetails);
+            var developers = userDetails.Select(u => new GetTeamDetailsDTO
+            {
+                UserId = u.UserId,
+                DeveloperName = $"{u.FirstName} {u.LastName}",
+                Email = u.Email,
+                ContactNumber = u.ContactNumber,
+                ImageSrc = u.ProfileImageUrl
 
+            }).ToList();
+
+            var response = new TeamDetailsResponseDTO
+            {
+                TeamName = project.TeamName,
+                ProjectName = project.ProjectName,
+                ProjectStatus = project.ProjectStatus,
+                Developers = developers
+            };
+
+            return Ok(response);
         }
+
+
 
 
 

@@ -35,12 +35,6 @@ namespace TASKHIVE.Models
         public List<Task> Tasks { get; set; }
 
 
-
-
-
-        public Admin Admin { get; set; }
-        public int AdminId { get; set; }
-
         public ProjectManager ProjectManager { get; set; }
         public int ProjectManagerId { get; set; }
 

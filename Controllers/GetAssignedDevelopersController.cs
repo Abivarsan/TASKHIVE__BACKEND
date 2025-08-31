@@ -21,6 +21,7 @@ namespace TASKHIVE.Controllers
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public string JobRoleName { get; set; }
+            public string ProfileImageUrl { get; set; }
 
         }
 
@@ -43,7 +44,8 @@ namespace TASKHIVE.Controllers
                     UserId = e.DeveloperId,
                     FirstName = e.Developer.User.FirstName,
                     LastName = e.Developer.User.LastName,
-                    JobRoleName = e.Developer.User.JobRole.JobRoleType
+                    JobRoleName = e.Developer.User.JobRole.JobRoleType,
+                     ProfileImageUrl = e.Developer.User.ProfileImageUrl
 
                 }).ToListAsync();
 
